@@ -1,0 +1,65 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint dan test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Pasang dependency
+        run: pip install -r requirements-dev.txt
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Test (pytest)
+        run: pytest -q
+
+  deploy-check:
+    name: Smoke test deployment dan paket rilis
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Pasang dependency API
+        run: pip install -r requirements.txt requests
+      - name: Siapkan artefak model
+        id: model
+        run: |
+          if [ -f artifacts/deepfake_detector.keras ] && [ -f artifacts/model_config.json ]; then
+            echo "dir=artifacts" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Model asli belum ada di artifacts/. Smoke test memakai model dummy."
+            python -m scripts.make_dummy_model --output /tmp/dummy_artifacts
+            echo "dir=/tmp/dummy_artifacts" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Jalankan API lalu smoke test
+        env:
+          ARTIFACTS_DIR: ${{ steps.model.outputs.dir }}
+          DATABASE_URL: sqlite:////tmp/smoke.db
+        run: |
+          uvicorn app.main:app --port 8000 &
+          python -m scripts.smoke_test --base-url http://127.0.0.1:8000 --wait 90
+      - name: Buat paket rilis
+        run: zip -r release.zip app streamlit_ui scripts artifacts requirements*.txt README.md .streamlit
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deepfake-detector-release
+          path: release.zip

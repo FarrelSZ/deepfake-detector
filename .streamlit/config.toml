@@ -1,0 +1,10 @@
+[theme]
+base = "light"
+primaryColor = "#0891A8"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5FBFC"
+textColor = "#13232E"
+orangeColor = "#E8641F"
+
+[server]
+maxUploadSize = 10

@@ -1,0 +1,11 @@
+# Layanan API (langkah 6 guideline).
+# Pasang versi TensorFlow yang sama dengan saat training (lihat "tensorflow_version" di
+# artifacts/model_config.json), karena format .keras bergantung pada versi Keras.
+fastapi>=0.115
+uvicorn>=0.30
+python-multipart>=0.0.9
+sqlalchemy>=2.0
+pillow>=10.0
+numpy>=1.26
+tensorflow>=2.16,<3
+# Opsional, jika memakai PostgreSQL lewat DATABASE_URL: psycopg2-binary

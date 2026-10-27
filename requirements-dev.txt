@@ -1,0 +1,7 @@
+-r requirements.txt
+-r requirements-ui.txt
+pytest>=8.0
+# TestClient FastAPI/Starlette terbaru memakai httpx2; httpx cadangan untuk Starlette versi lama
+httpx2>=2.0
+httpx>=0.27
+ruff>=0.6

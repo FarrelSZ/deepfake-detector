@@ -1,0 +1,41 @@
+{
+  "model_name": "cnn_mhsa",
+  "dataset": "140K Real and Fake Faces (Kaggle: xhlulu/140k-real-and-fake-faces)",
+  "img_size": 128,
+  "class_names": [
+    "real",
+    "fake"
+  ],
+  "positive_class": "fake",
+  "threshold": 0.6,
+  "input_spec": "RGB float32 skala 0-255, di-resize ke img_size x img_size (bilinear, antialias). Normalisasi 1/255 sudah ada di dalam model.",
+  "output_spec": "P(fake) pada rentang 0-1 (sigmoid). Label fake jika P(fake) >= threshold.",
+  "gradcam_layer": "block4_relu2",
+  "hyperparameters": {
+    "learning_rate": 0.0003,
+    "batch_size": 32,
+    "base_filters": 32,
+    "num_blocks": 4,
+    "num_heads": 4,
+    "dropout": 0.0
+  },
+  "training_recipe": {
+    "optimizer": "Adam",
+    "epochs": 20,
+    "bn_momentum": 0.9,
+    "lr_schedule": "warm-up 1 epoch lalu cosine decay ke 1% dari learning rate puncak"
+  },
+  "n_images": {
+    "train": 20000,
+    "valid": 4000,
+    "test": 10000
+  },
+  "test_metrics": {
+    "accuracy": 0.9395,
+    "precision": 0.9438497273278126,
+    "recall": 0.9346,
+    "f1": 0.9392020902421867,
+    "auc": 0.98649062
+  },
+  "tensorflow_version": "2.21.0"
+}
